@@ -165,7 +165,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <div class="casino-tabs-wrap"><div class="casino-tabs" id="casino-tabs"></div></div>
 
 <div class="controls">
-  <input class="search" type="text" id="search-input" placeholder="Bar oder Casino suchen..." oninput="render()" id="search">
+  <input class="search" type="text" id="search" placeholder="Bar oder Casino suchen..." oninput="render()" id="search">
   <button class="filter-btn active" id="fb-all" onclick="setFilter('all',this)">Alle</button>
   <button class="filter-btn" id="fb-open" onclick="setFilter('unvisited',this)">Offen</button>
   <button class="filter-btn" id="fb-visited" onclick="setFilter('visited',this)">Besucht</button>
@@ -383,7 +383,7 @@ function toggleLang() {
 
 function updateUI() {
   // Search placeholder
-  const si = document.getElementById('search-input');
+  const si = document.getElementById('search');
   if (si) si.placeholder = t('search');
   // Filter buttons
   const fAll = document.getElementById('fb-all');
