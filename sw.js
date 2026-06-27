@@ -1,4 +1,4 @@
-const CACHE = 'vegas-bar-tracker-v1';
+const CACHE = 'vegas-bar-tracker-v3';
 const ASSETS = [
   '/vegas-bar-tracker/',
   '/vegas-bar-tracker/index.html'

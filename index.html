@@ -51,6 +51,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .filter-btn{padding:5px 11px;font-size:11px;letter-spacing:.4px;cursor:pointer;border:1px solid var(--border);border-radius:6px;background:none;color:var(--muted);white-space:nowrap;transition:all .15s;font-family:'DM Sans',sans-serif;}
 .filter-btn.active{border-color:var(--green);color:var(--green);background:rgba(61,214,140,.05);}
 .filter-btn:hover:not(.active){color:var(--text);}
+.lang-btn{padding:6px 10px;font-size:11px;letter-spacing:.8px;cursor:pointer;border:1px solid var(--muted2);border-radius:6px;background:none;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s;font-weight:500;}
+.lang-btn:hover{border-color:var(--accent);color:var(--accent);}
 .add-btn{padding:6px 12px;font-size:11px;letter-spacing:.4px;cursor:pointer;border:1px solid var(--accent);border-radius:6px;background:none;color:var(--accent);font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;margin-left:auto;}
 .add-btn:hover{background:var(--accent);color:#000;}
 
@@ -154,20 +156,21 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </div>
 
 <div class="area-tabs">
-  <button class="area-tab active" onclick="setArea('all',this)">Alle</button>
-  <button class="area-tab" onclick="setArea('strip',this)">Strip</button>
-  <button class="area-tab" onclick="setArea('downtown',this)">Downtown</button>
-  <button class="area-tab" onclick="setArea('local',this)">Local</button>
+  <button class="area-tab active" id="at-all" onclick="setArea('all',this)">Alle</button>
+  <button class="area-tab" id="at-strip" onclick="setArea('strip',this)">Strip</button>
+  <button class="area-tab" id="at-downtown" onclick="setArea('downtown',this)">Downtown</button>
+  <button class="area-tab" id="at-local" onclick="setArea('local',this)">Local</button>
 </div>
 
 <div class="casino-tabs-wrap"><div class="casino-tabs" id="casino-tabs"></div></div>
 
 <div class="controls">
-  <input class="search" type="text" placeholder="Bar oder Casino suchen..." oninput="render()" id="search">
-  <button class="filter-btn active" onclick="setFilter('all',this)">Alle</button>
-  <button class="filter-btn" onclick="setFilter('unvisited',this)">Offen</button>
-  <button class="filter-btn" onclick="setFilter('visited',this)">Besucht</button>
-  <button class="add-btn" onclick="openAdd()">+ Hinzufügen</button>
+  <input class="search" type="text" id="search-input" placeholder="Bar oder Casino suchen..." oninput="render()" id="search">
+  <button class="filter-btn active" id="fb-all" onclick="setFilter('all',this)">Alle</button>
+  <button class="filter-btn" id="fb-open" onclick="setFilter('unvisited',this)">Offen</button>
+  <button class="filter-btn" id="fb-visited" onclick="setFilter('visited',this)">Besucht</button>
+  <button class="lang-btn" id="lang-btn" onclick="toggleLang()">EN</button>
+    <button class="add-btn" id="add-btn" onclick="openAdd()">+ Hinzufügen</button>
 </div>
 
 <div class="content">
@@ -178,143 +181,177 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <script>
 const BARS = [
   // ── STRIP ────────────────────────────────────────────────────────────────
-  {id:1,name:"Rhythm & Riffs",casino:"Mandalay Bay",area:"strip",type:"vp",note:"24h (Do–Sa), Live Music Fr/Sa ab 22 Uhr, $2 Video Poker am Tresen",visited:false,rating:0},
-  {id:2,name:"Centra Bar & Lounge",casino:"Luxor",area:"strip",type:"vp",note:"Mitten im Casino Floor, Sport-Screens, Bar top VP",visited:false,rating:0},
-  {id:3,name:"Flight",casino:"Luxor",area:"strip",type:"vp",note:"17–4 Uhr täglich, Blackjack & Video Poker am Tresen",visited:false,rating:0},
-  {id:4,name:"Tiki Bar",casino:"Excalibur",area:"strip",type:"vp",note:"Neu Dez. 2025, Bar top Gaming bestätigt (Foto), Strohdach, Live Entertainment",visited:false,rating:0},
-  {id:5,name:"Sherwood Bar",casino:"Excalibur",area:"strip",type:"vp",note:"Video Poker am Tresen, ca. 16:30–2:30 Uhr",visited:false,rating:0},
-  {id:6,name:"Lobby Bar",casino:"Excalibur",area:"strip",type:"vp",note:"24h, Bar top Gaming bestätigt",visited:false,rating:0},
-  {id:7,name:"Midtown Bar",casino:"New York-New York",area:"strip",type:"vp",note:"Bar top Gaming bestätigt, Sport-Screens",visited:false,rating:0},
-  {id:8,name:"Bar at Times Square",casino:"New York-New York",area:"strip",type:"vp",note:"Dueling Pianos täglich ab 11 Uhr, Video Poker am Tresen",visited:false,rating:0},
-  {id:9,name:"Center Bar",casino:"New York-New York",area:"strip",type:"vp",note:"Spin Poker + Multi-Game Bartops, mitten im Casino Floor",visited:false,rating:0},
-  {id:10,name:"BetMGM Sportsbook & Bar",casino:"Park MGM",area:"strip",type:"vp",note:"VP am Tresen, Bowling, Billard, Duckpin. Einziges rauchfreies Casino am Strip.",visited:false,rating:0},
-  {id:11,name:"West Bar",casino:"Park MGM",area:"strip",type:"bar",note:"Inoffizieller Name, existiert auf dem Casino Floor",visited:false,rating:0},
-  {id:12,name:"Alibi Ultra Lounge",casino:"ARIA",area:"strip",type:"bar",note:"Direkt neben dem Casino Floor, Lounge-Charakter",visited:false,rating:0},
-  {id:13,name:"Lift Bar",casino:"ARIA",area:"strip",type:"bar",note:"24h, Live Entertainment, Cocktail-Lounge",visited:false,rating:0},
-  {id:14,name:"Gem Bar",casino:"ARIA",area:"strip",type:"vp",note:"Bar top Gaming explizit bestätigt, Casino Floor, Plüsch-Seating",visited:false,rating:0},
-  {id:15,name:"Sports Bar",casino:"ARIA",area:"strip",type:"bar",note:"Direkt am BetMGM Sportsbook",visited:false,rating:0},
-  {id:16,name:"The Chandelier",casino:"Cosmopolitan",area:"strip",type:"vp",note:"3 Etagen, Casino Level: 18 VP-Maschinen an Main + Side Bar, Drink Ticket System. Ikonisch.",visited:false,rating:0},
-  {id:17,name:"BetMGM Sportsbook & Lounge",casino:"Cosmopolitan",area:"strip",type:"vp",note:"23 Bar top VP-Maschinen, LED Videowalls, Full Bar. Mo–Mi 8–1, Do–So 8–2 Uhr.",visited:false,rating:0},
-  {id:18,name:"Baccarat Bar",casino:"Bellagio",area:"strip",type:"vp",note:"24h, 3-teilig: Zentrale Lounge + zwei VP-Bars. $1 Min, Spin Poker, legendär für Comp-Drinks.",visited:false,rating:0},
-  {id:19,name:"BetMGM Sportsbook Bar",casino:"Bellagio",area:"strip",type:"vp",note:"VP ab $0,25, 5.600 sqft, 38 Flatscreens + 6 große Sportscreens",visited:false,rating:0},
-  {id:20,name:"Galleria Bar",casino:"Caesars Palace",area:"strip",type:"vp",note:"24 Plätze, 22 Multi-Game-Maschinen, 2022 renoviert, vier lebensgroße Venus-Skulpturen",visited:false,rating:0},
-  {id:21,name:"Lobby Bar",casino:"Caesars Palace",area:"strip",type:"vp",note:"Bar top Gaming bestätigt, zentrale Lage",visited:false,rating:0},
-  {id:22,name:"Apostrophe Bar",casino:"Caesars Palace",area:"strip",type:"vp",note:"Runde Bar neben Bacchanal Buffet, fast jeder Platz = VP. Name = Anspielung auf fehlendes Apostroph.",visited:false,rating:0},
-  {id:23,name:"Stadia Bar",casino:"Caesars Palace",area:"strip",type:"vp",note:"120 Plätze, 2021, 5 VIP Domes in Football-Helm-Form (Rockwell Group)",visited:false,rating:0},
-  {id:24,name:"Sportsbook Bar",casino:"Caesars Palace",area:"strip",type:"vp",note:"Bar top Gaming bestätigt, casual Atmosphäre",visited:false,rating:0},
-  {id:25,name:"Montecristo Cigar Bar",casino:"Caesars Palace",area:"strip",type:"vp",note:"VP + Comp-Drinks, 208-Zoll Videowall, 400 sqft Walk-in Humidor, 1.000+ Zigarren",visited:false,rating:0},
-  {id:26,name:"Golden Circle Sports Bar",casino:"Treasure Island",area:"strip",type:"vp",note:"Bar top Slots/VP, $5 Happy Hour, Bar Food",visited:false,rating:0},
-  {id:27,name:"Breeze Bar",casino:"Treasure Island",area:"strip",type:"vp",note:"Bar top Gaming, direkt auf Casino Floor, $5 Happy Hour",visited:false,rating:0},
-  {id:28,name:"Crystal Bar",casino:"Resorts World",area:"strip",type:"vp",note:"24h, unter ikonischer beleuchteter Decke, VP + Blackjack + Slots am Tresen, Comp-Drinks",visited:false,rating:0},
-  {id:29,name:"Gatsby's Cocktail Lounge",casino:"Resorts World",area:"strip",type:"bar",note:"360-Grad-Bar, DJ Sets + Live Music, Secret Menu",visited:false,rating:0},
-  {id:30,name:"West Bar",casino:"Circus Circus",area:"strip",type:"vp",note:"24h, Bar top VP explizit bestätigt",visited:false,rating:0},
-  {id:31,name:"Sports Book Bar",casino:"Circus Circus",area:"strip",type:"bar",note:"Kein klassischer Sportsbook mehr, existiert als Bar mit Screens",visited:false,rating:0},
-  {id:32,name:"Flair Bar",casino:"Circus Circus",area:"strip",type:"bar",note:"Flair Bartending, Entertainment-Fokus",visited:false,rating:0},
-  {id:33,name:"View Lounge",casino:"Strat",area:"strip",type:"bar",note:"Über William Hill Sports Book, Mo–Do 11–2, Fr 11–4, Sa 9–4, So 9–2, Locals: 2-for-1",visited:false,rating:0},
-  {id:34,name:"REMIX Lounge",casino:"Strat",area:"strip",type:"vp",note:"Bar top Gaming bestätigt, DJ Sets, Locals: 2-for-1",visited:false,rating:0},
-  {id:35,name:"PT's Wings & Sports",casino:"Strat",area:"strip",type:"bar",note:"24+ Craft Biere inkl. Hausbrauerei, Pub Food, Fr–So 11–Mitternacht",visited:false,rating:0},
-  {id:36,name:"Yahoo Sportsbook powered by William Hill",casino:"Venetian/Palazzo",area:"strip",type:"bar",note:"12.000 sqft, 1.770 sqft LED Wall (46 Mio. Pixel), Oval Bar 29 Plätze",visited:false,rating:0},
-  {id:37,name:"Bellini Bar",casino:"Venetian/Palazzo",area:"strip",type:"vp",note:"24h, Video Poker an Barplätzen bestätigt, Venetian Casino Floor",visited:false,rating:0},
-  {id:38,name:"Bar Luca",casino:"Venetian/Palazzo",area:"strip",type:"vp",note:"24h, Bar top VP + Slots bestätigt, Palazzo Casino Floor",visited:false,rating:0},
-  {id:39,name:"BarBook",casino:"Casino Royale",area:"strip",type:"vp",note:"7/5 Bonus Poker 25¢–$5, teils 9/6 VP – für den Strip außergewöhnlich gut. Sports Bar + William Hill.",visited:false,rating:0},
-  {id:40,name:"The Lounge",casino:"Harrah's",area:"strip",type:"vp",note:"Bar top Multi-Game bestätigt, TVs für Sport",visited:false,rating:0},
-  {id:41,name:"Signature Bar",casino:"Harrah's",area:"strip",type:"bar",note:"Craft Beer + Beer Cocktails",visited:false,rating:0},
-  {id:42,name:"Carnaval Court",casino:"Harrah's",area:"strip",type:"live",note:"Outdoor Blackjack ($5 Min), Flair Bartender, Live Bands + DJs täglich 12–3 Uhr. Einzige Outdoor-Blackjack-Bar am Strip.",visited:false,rating:0},
-  {id:43,name:"Catalyst Bar",casino:"LINQ",area:"strip",type:"bar",note:"Flair Bartender 24/7, mitten im Casino Floor",visited:false,rating:0},
-  {id:44,name:"O'Sheas Pub",casino:"LINQ",area:"strip",type:"live",note:"Blackjack, Bubble Craps, Beer Pong, 50+ Biersorten, drei Bars innen",visited:false,rating:0},
-  {id:45,name:"3535 Bar",casino:"LINQ",area:"strip",type:"bar",note:"VIP Lounge, Casino Games + eigener DJ",visited:false,rating:0},
-  {id:46,name:"Bugsy's Bar",casino:"Flamingo",area:"strip",type:"vp",note:"24h, VP bestätigt, frisch renoviert 2025/2026",visited:false,rating:0},
-  {id:47,name:"Garden Bar",casino:"Flamingo",area:"strip",type:"bar",note:"Erhöhte Terrasse mit Blick auf Flamingo Lagune und Wasserfälle",visited:false,rating:0},
-  {id:48,name:"Lobby Bar",casino:"Horseshoe",area:"strip",type:"vp",note:"Bar top Gaming bestätigt, selbstspielendes Klavier, Onyx Tresen",visited:false,rating:0},
-  {id:49,name:"Sully's Casino Bar",casino:"Horseshoe",area:"strip",type:"vp",note:"VP direkt am Tresen, Open-Air neben Casino Floor, 24h",visited:false,rating:0},
-  {id:50,name:"The Arcade Bar",casino:"Horseshoe",area:"strip",type:"vp",note:"Bar top Gaming bestätigt, im Untergeschoss bei der Arcade",visited:false,rating:0},
-  {id:51,name:"Indigo Lounge",casino:"Horseshoe",area:"strip",type:"vp",note:"Bar top Gaming bestätigt, große Screens. Mo–Do+So 11–2, Fr–Sa 12–3.",visited:false,rating:0},
-  {id:52,name:"Montecristo Cigar Bar",casino:"Paris",area:"strip",type:"vp",note:"8 Bar top Games, 2.835 sqft, 70+ Plätze, Walk-in Humidor, 16x9ft LED Wall",visited:false,rating:0},
-  {id:53,name:"Le Cabaret Lounge",casino:"Paris",area:"strip",type:"bar",note:"Live Entertainment Fr+Sa",visited:false,rating:0},
-  {id:54,name:"Gustav's Bar",casino:"Paris",area:"strip",type:"vp",note:"24h, VP + Blackjack am Tresen, direkt neben Eiffelturm-Beinen",visited:false,rating:0},
-  {id:55,name:"Caesars Sportsbook Bar & Lounge",casino:"Paris",area:"strip",type:"vp",note:"Bar top Gaming bestätigt, 3.000 sqft, 1.200 sqft LED Screen",visited:false,rating:0},
-  {id:56,name:"Le Central",casino:"Paris",area:"strip",type:"vp",note:"Bar top Gaming bestätigt, Casino Floor, direkt neben Montecristo",visited:false,rating:0},
-  {id:57,name:"Extra Lounge",casino:"Planet Hollywood",area:"strip",type:"bar",note:"Live Music Mi–Sa 21–1 Uhr, 80s/90s Musik",visited:false,rating:0},
-  {id:58,name:"Ringer Bar",casino:"Planet Hollywood",area:"strip",type:"vp",note:"Bar top Gaming bestätigt, direkt am Caesars Sportsbook, Wings/Pizza/Sliders",visited:false,rating:0},
-  {id:59,name:"Glass Bar",casino:"Planet Hollywood",area:"strip",type:"vp",note:"Bar top Gaming, 24h, eröffnet Winter 2024, Kristallprismen (Rockwell Group)",visited:false,rating:0},
-  {id:60,name:"50 Cent's Candy Shop Bar & Lounge",casino:"Planet Hollywood",area:"strip",type:"vp",note:"Bar top Gaming, 80-Zoll Screens, vor Bakkt Theater. Mo–Do 14–22, Fr–Sa 10–22. (ehem. Blue Moon Bar)",visited:false,rating:0},
-  {id:61,name:"Bound Bar",casino:"Cromwell",area:"strip",type:"vp",note:"Elevated Lobby Bar, VP am Tresen. Achtung: Cromwell → Vanderpump Hotel Umbau.",visited:false,rating:0},
-  {id:62,name:"Interlude",casino:"Cromwell",area:"strip",type:"vp",note:"Lounge mitten im Gaming Floor. Achtung: Cromwell → Vanderpump Hotel Umbau.",visited:false,rating:0},
-  {id:63,name:"Whiskey Down",casino:"MGM Grand",area:"strip",type:"live",note:"3 Blackjack Tische + 7 VP-Maschinen, Speakeasy-Stil, 50+ Whiskies, 11–3 Uhr",visited:false,rating:0},
-  {id:64,name:"Lobby Bar",casino:"MGM Grand",area:"strip",type:"vp",note:"Bar top Gaming bestätigt, Sport-TVs, zentrale Lage",visited:false,rating:0},
-  {id:65,name:"Casino Bar",casino:"MGM Grand",area:"strip",type:"vp",note:"Die lange Bar mitten im Casino, mehrere VP-Maschinen, 14–2 Uhr",visited:false,rating:0},
-  {id:66,name:"Centrifuge",casino:"MGM Grand",area:"strip",type:"bar",note:"Runde Bar neben Hakkasan, Flair Bartender. Mi–Do 19–3, Fr–Sa 19–4, So 19–3.",visited:false,rating:0},
-  {id:67,name:"The Tavern",casino:"Fontainebleau",area:"strip",type:"vp",note:"Einzige Gaming Bar im Fontainebleau, im STN Sports Sportsbook, VP ab $0,25 bis $5",visited:false,rating:0},
-  {id:68,name:"Chickie's & Pete's Crab House & Sports Bar",casino:"Sahara",area:"strip",type:"vp",note:"Super Star Poker VP 50¢/$1, William Hill Sports Betting, 50+ HD Screens",visited:false,rating:0},
-  {id:69,name:"CASBAR Lounge",casino:"Sahara",area:"strip",type:"vp",note:"24h, VP Slant-tops, 'Bronze Best Cocktail Bar 2024', Dueling Pianos Fr+Sa, Happy Hour 15–17 + 20–21 + 0–6",visited:false,rating:0},
-
+  {id:1,name:"Rhythm & Riffs",casino:"Mandalay Bay",area:"strip",type:"vp",note:{de:"24h (Do–Sa), Live Music Fr/Sa ab 22 Uhr, $2 Video Poker am Tresen",en:"24h (Thu–Sat), Live Music Fri/Sat from 10pm, $2 Video Poker at the bar"},visited:false,rating:0},
+  {id:2,name:"Centra Bar & Lounge",casino:"Luxor",area:"strip",type:"vp",note:{de:"Mitten im Casino Floor, Sport-Screens, Bar top VP",en:"Right on the casino floor, sports screens, bar top VP"},visited:false,rating:0},
+  {id:3,name:"Flight",casino:"Luxor",area:"strip",type:"vp",note:{de:"17–4 Uhr täglich, Blackjack & Video Poker am Tresen",en:"5pm–4am daily, Blackjack & Video Poker at the bar"},visited:false,rating:0},
+  {id:4,name:"Tiki Bar",casino:"Excalibur",area:"strip",type:"vp",note:{de:"Neu Dez. 2025, Bar top Gaming bestätigt (Foto), Strohdach, Live Entertainment",en:"Brand new Dec. 2025, bar top gaming confirmed (photo), thatched roof, live entertainment"},visited:false,rating:0},
+  {id:5,name:"Sherwood Bar",casino:"Excalibur",area:"strip",type:"vp",note:{de:"Video Poker am Tresen, ca. 16:30–2:30 Uhr",en:"Video Poker at the bar, approx. 4:30pm–2:30am"},visited:false,rating:0},
+  {id:6,name:"Lobby Bar",casino:"Excalibur",area:"strip",type:"vp",note:{de:"24h, Bar top Gaming bestätigt",en:"24h, bar top gaming confirmed"},visited:false,rating:0},
+  {id:7,name:"Midtown Bar",casino:"New York-New York",area:"strip",type:"vp",note:{de:"Bar top Gaming bestätigt, Sport-Screens",en:"Bar top gaming confirmed, sports screens"},visited:false,rating:0},
+  {id:8,name:"Bar at Times Square",casino:"New York-New York",area:"strip",type:"vp",note:{de:"Dueling Pianos täglich ab 11 Uhr, Video Poker am Tresen bestätigt",en:"Dueling Pianos daily from 11am, Video Poker at the bar confirmed"},visited:false,rating:0},
+  {id:9,name:"Center Bar",casino:"New York-New York",area:"strip",type:"vp",note:{de:"Spin Poker + Multi-Game Bartops, mitten im Casino Floor",en:"Spin Poker + Multi-Game bartops, right in the middle of the casino floor"},visited:false,rating:0},
+  {id:10,name:"BetMGM Sportsbook & Bar",casino:"Park MGM",area:"strip",type:"vp",note:{de:"VP am Tresen, Bowling, Billard, Duckpin. Einziges rauchfreies Casino am Strip.",en:"VP at the bar, bowling, billiards, duckpin. Only smoke-free casino on the Strip."},visited:false,rating:0},
+  {id:11,name:"West Bar",casino:"Park MGM",area:"strip",type:"bar",note:{de:"Inoffizieller Name, existiert auf dem Casino Floor",en:"Unofficial name, exists on the casino floor"},visited:false,rating:0},
+  {id:12,name:"Alibi Ultra Lounge",casino:"ARIA",area:"strip",type:"bar",note:{de:"Direkt neben dem Casino Floor, Lounge-Charakter",en:"Right next to the casino floor, lounge character"},visited:false,rating:0},
+  {id:13,name:"Lift Bar",casino:"ARIA",area:"strip",type:"bar",note:{de:"24h, Live Entertainment, Cocktail-Lounge",en:"24h, live entertainment, cocktail lounge"},visited:false,rating:0},
+  {id:14,name:"Gem Bar",casino:"ARIA",area:"strip",type:"vp",note:{de:"Bar top Gaming explizit bestätigt, Casino Floor, Plüsch-Seating",en:"Bar top gaming explicitly confirmed, casino floor, plush seating"},visited:false,rating:0},
+  {id:15,name:"Sports Bar",casino:"ARIA",area:"strip",type:"bar",note:{de:"Direkt am BetMGM Sportsbook",en:"Directly at the BetMGM Sportsbook"},visited:false,rating:0},
+  {id:16,name:"The Chandelier",casino:"Cosmopolitan",area:"strip",type:"vp",note:{de:"3 Etagen, Casino Level: 18 VP-Maschinen an Main + Side Bar, Drink Ticket System. Ikonisch.",en:"3 floors, casino level: 18 VP machines at main + side bar, drink ticket system. Iconic."},visited:false,rating:0},
+  {id:17,name:"BetMGM Sportsbook & Lounge",casino:"Cosmopolitan",area:"strip",type:"vp",note:{de:"23 Bar top VP-Maschinen, LED Videowalls, Full Bar. Mo–Mi 8–1, Do–So 8–2 Uhr.",en:"23 bar top VP machines, LED video walls, full bar with food. Mon–Wed 8am–1am, Thu–Sun 8am–2am."},visited:false,rating:0},
+  {id:18,name:"Baccarat Bar",casino:"Bellagio",area:"strip",type:"vp",note:{de:"24h, 3-teilig: Zentrale Lounge + zwei VP-Bars. $1 Min, Spin Poker, legendär für Comp-Drinks.",en:"24h, 3-part: central lounge + two VP bars. $1 min, Spin Poker, legendary for comp drinks."},visited:false,rating:0},
+  {id:19,name:"BetMGM Sportsbook Bar",casino:"Bellagio",area:"strip",type:"vp",note:{de:"VP ab $0,25, 5.600 sqft, 38 Flatscreens + 6 große Sportscreens",en:"VP from $0.25, 5,600 sqft, 38 flatscreens + 6 large sports screens"},visited:false,rating:0},
+  {id:20,name:"Galleria Bar",casino:"Caesars Palace",area:"strip",type:"vp",note:{de:"24 Plätze, 22 Multi-Game-Maschinen, 2022 renoviert, vier lebensgroße Venus-Skulpturen",en:"24 seats, 22 multi-game machines, renovated 2022, four life-size Venus sculptures"},visited:false,rating:0},
+  {id:21,name:"Lobby Bar",casino:"Caesars Palace",area:"strip",type:"vp",note:{de:"Bar top Gaming bestätigt, zentrale Lage",en:"Bar top gaming confirmed, central location"},visited:false,rating:0},
+  {id:22,name:"Apostrophe Bar",casino:"Caesars Palace",area:"strip",type:"vp",note:{de:"Runde Bar neben Bacchanal Buffet, fast jeder Platz = VP. Name = Anspielung auf fehlendes Apostroph.",en:"Round bar next to Bacchanal Buffet, almost every seat = VP. Name references the missing apostrophe in Caesars."},visited:false,rating:0},
+  {id:23,name:"Stadia Bar",casino:"Caesars Palace",area:"strip",type:"vp",note:{de:"120 Plätze, 2021, 5 VIP Domes in Football-Helm-Form (Rockwell Group)",en:"120 seats, opened 2021, 5 VIP domes in football helmet shape (Rockwell Group)"},visited:false,rating:0},
+  {id:24,name:"Sportsbook Bar",casino:"Caesars Palace",area:"strip",type:"vp",note:{de:"Bar top Gaming bestätigt, casual Atmosphäre",en:"Bar top gaming confirmed, casual atmosphere"},visited:false,rating:0},
+  {id:25,name:"Montecristo Cigar Bar",casino:"Caesars Palace",area:"strip",type:"vp",note:{de:"VP + Comp-Drinks, 208-Zoll Videowall, 400 sqft Walk-in Humidor, 1.000+ Zigarren",en:"VP + comp drinks, 208-inch video wall, 400 sqft walk-in humidor, 1,000+ cigars"},visited:false,rating:0},
+  {id:26,name:"Golden Circle Sports Bar",casino:"Treasure Island",area:"strip",type:"vp",note:{de:"Bar top Slots/VP, $5 Happy Hour, Bar Food",en:"Bar top slots/VP, $5 happy hour, bar food"},visited:false,rating:0},
+  {id:27,name:"Breeze Bar",casino:"Treasure Island",area:"strip",type:"vp",note:{de:"Bar top Gaming, direkt auf Casino Floor, $5 Happy Hour",en:"Bar top gaming, right on casino floor, $5 happy hour"},visited:false,rating:0},
+  {id:28,name:"Crystal Bar",casino:"Resorts World",area:"strip",type:"vp",note:{de:"24h, unter ikonischer beleuchteter Decke, VP + Blackjack + Slots am Tresen, Comp-Drinks",en:"24h, under iconic illuminated ceiling, VP + Blackjack + Slots at the bar, comp drinks"},visited:false,rating:0},
+  {id:29,name:"Gatsby's Cocktail Lounge",casino:"Resorts World",area:"strip",type:"bar",note:{de:"360-Grad-Bar, DJ Sets + Live Music, Secret Menu",en:"360-degree bar, DJ sets + live music, secret menu"},visited:false,rating:0},
+  {id:30,name:"West Bar",casino:"Circus Circus",area:"strip",type:"vp",note:{de:"24h, Bar top VP explizit bestätigt",en:"24h, bar top VP explicitly confirmed"},visited:false,rating:0},
+  {id:31,name:"Sports Book Bar",casino:"Circus Circus",area:"strip",type:"bar",note:{de:"Kein klassischer Sportsbook mehr, existiert als Bar mit Screens",en:"No classic sportsbook anymore, exists as a bar with screens"},visited:false,rating:0},
+  {id:32,name:"Flair Bar",casino:"Circus Circus",area:"strip",type:"bar",note:{de:"Flair Bartending, Entertainment-Fokus",en:"Flair bartending, entertainment-focused"},visited:false,rating:0},
+  {id:33,name:"View Lounge",casino:"Strat",area:"strip",type:"bar",note:{de:"Über William Hill Sports Book, Mo–Do 11–2, Fr 11–4, Sa 9–4, So 9–2, Locals: 2-for-1",en:"Above William Hill Sports Book, Mon–Thu 11am–2am, Fri 11am–4am, Sat 9am–4am, Sun 9am–2am, Locals: 2-for-1"},visited:false,rating:0},
+  {id:34,name:"REMIX Lounge",casino:"Strat",area:"strip",type:"vp",note:{de:"Bar top Gaming bestätigt, DJ Sets, Locals: 2-for-1",en:"Bar top gaming confirmed, DJ sets, Locals: 2-for-1 drinks"},visited:false,rating:0},
+  {id:35,name:"PT's Wings & Sports",casino:"Strat",area:"strip",type:"bar",note:{de:"24+ Craft Biere inkl. Hausbrauerei, Pub Food, Fr–So 11–Mitternacht",en:"24+ craft beers on tap incl. house brewery, pub food, Fri–Sun 11am–midnight"},visited:false,rating:0},
+  {id:36,name:"Yahoo Sportsbook powered by William Hill",casino:"Venetian/Palazzo",area:"strip",type:"bar",note:{de:"12.000 sqft, 1.770 sqft LED Wall (46 Mio. Pixel), Oval Bar 29 Plätze",en:"12,000 sqft, 1,770 sqft LED wall (46 million pixels), oval bar with 29 seats"},visited:false,rating:0},
+  {id:37,name:"Bellini Bar",casino:"Venetian/Palazzo",area:"strip",type:"vp",note:{de:"24h, Video Poker an Barplätzen bestätigt, Venetian Casino Floor",en:"24h, Video Poker at bar seats confirmed, Venetian casino floor"},visited:false,rating:0},
+  {id:38,name:"Bar Luca",casino:"Venetian/Palazzo",area:"strip",type:"vp",note:{de:"24h, Bar top VP + Slots bestätigt, Palazzo Casino Floor",en:"24h, bar top VP + slots confirmed, Palazzo casino floor"},visited:false,rating:0},
+  {id:39,name:"BarBook",casino:"Casino Royale",area:"strip",type:"vp",note:{de:"7/5 Bonus Poker 25¢–$5, teils 9/6 VP – für den Strip außergewöhnlich. Sports Bar + William Hill.",en:"7/5 Bonus Poker 25c-$5, sometimes 9/6 VP - exceptional for the Strip. Sports Bar + William Hill."},visited:false,rating:0},
+  {id:40,name:"The Lounge",casino:"Harrah's",area:"strip",type:"vp",note:{de:"Bar top Multi-Game bestätigt, TVs für Sport",en:"Bar top multi-game confirmed, TVs for sports"},visited:false,rating:0},
+  {id:41,name:"Signature Bar",casino:"Harrah's",area:"strip",type:"bar",note:{de:"Craft Beer + Beer Cocktails",en:"Craft beer + beer cocktails"},visited:false,rating:0},
+  {id:42,name:"Carnaval Court",casino:"Harrah's",area:"strip",type:"live",note:{de:"Outdoor Blackjack ($5 Min), Flair Bartender, Live Bands + DJs täglich 12–3 Uhr. Einzige Outdoor-Blackjack-Bar am Strip.",en:"Outdoor Blackjack ($5 min), flair bartenders, live bands + DJs daily 12pm–3am. Only outdoor blackjack bar on the Strip."},visited:false,rating:0},
+  {id:43,name:"Catalyst Bar",casino:"LINQ",area:"strip",type:"bar",note:{de:"Flair Bartender 24/7, mitten im Casino Floor",en:"Flair bartenders 24/7, right in the middle of the casino floor"},visited:false,rating:0},
+  {id:44,name:"O'Sheas Pub",casino:"LINQ",area:"strip",type:"live",note:{de:"Blackjack, Bubble Craps, Beer Pong, 50+ Biersorten, drei Bars innen",en:"Blackjack, Bubble Craps, Beer Pong, 50+ beers, three bars inside"},visited:false,rating:0},
+  {id:45,name:"3535 Bar",casino:"LINQ",area:"strip",type:"bar",note:{de:"VIP Lounge, Casino Games + eigener DJ",en:"VIP lounge, casino games + own DJ"},visited:false,rating:0},
+  {id:46,name:"Bugsy's Bar",casino:"Flamingo",area:"strip",type:"vp",note:{de:"24h, VP bestätigt, frisch renoviert 2025/2026",en:"24h, VP confirmed, freshly renovated 2025/2026"},visited:false,rating:0},
+  {id:47,name:"Garden Bar",casino:"Flamingo",area:"strip",type:"bar",note:{de:"Erhöhte Terrasse mit Blick auf Flamingo Lagune und Wasserfälle",en:"Elevated terrace overlooking the Flamingo Lagoon and waterfalls"},visited:false,rating:0},
+  {id:48,name:"Lobby Bar",casino:"Horseshoe",area:"strip",type:"vp",note:{de:"Bar top Gaming bestätigt, selbstspielendes Klavier, Onyx Tresen",en:"Bar top gaming confirmed, self-playing piano, onyx bar top"},visited:false,rating:0},
+  {id:49,name:"Sully's Casino Bar",casino:"Horseshoe",area:"strip",type:"vp",note:{de:"VP direkt am Tresen, Open-Air neben Casino Floor, 24h",en:"VP directly at the bar, open-air next to casino floor, 24h"},visited:false,rating:0},
+  {id:50,name:"The Arcade Bar",casino:"Horseshoe",area:"strip",type:"vp",note:{de:"Bar top Gaming bestätigt, im Untergeschoss bei der Arcade",en:"Bar top gaming confirmed, lower level at the arcade"},visited:false,rating:0},
+  {id:51,name:"Indigo Lounge",casino:"Horseshoe",area:"strip",type:"vp",note:{de:"Bar top Gaming bestätigt, große Screens. Mo–Do+So 11–2, Fr–Sa 12–3.",en:"Bar top gaming confirmed, large screens. Mon–Thu+Sun 11am–2am, Fri–Sat 12pm–3am."},visited:false,rating:0},
+  {id:52,name:"Montecristo Cigar Bar",casino:"Paris",area:"strip",type:"vp",note:{de:"8 Bar top Games, 2.835 sqft, 70+ Plätze, Walk-in Humidor, 16x9ft LED Wall",en:"8 bar top games, 2,835 sqft, 70+ seats, walk-in humidor, 16x9ft LED wall"},visited:false,rating:0},
+  {id:53,name:"Le Cabaret Lounge",casino:"Paris",area:"strip",type:"bar",note:{de:"Live Entertainment Fr+Sa",en:"Live entertainment Fri+Sat"},visited:false,rating:0},
+  {id:54,name:"Gustav's Bar",casino:"Paris",area:"strip",type:"vp",note:{de:"24h, VP + Blackjack am Tresen, direkt neben Eiffelturm-Beinen",en:"24h, VP + Blackjack at the bar, right next to the Eiffel Tower legs"},visited:false,rating:0},
+  {id:55,name:"Caesars Sportsbook Bar & Lounge",casino:"Paris",area:"strip",type:"vp",note:{de:"Bar top Gaming bestätigt, 3.000 sqft, 1.200 sqft LED Screen",en:"Bar top gaming confirmed, 3,000 sqft, 1,200 sqft LED screen"},visited:false,rating:0},
+  {id:56,name:"Le Central",casino:"Paris",area:"strip",type:"vp",note:{de:"Bar top Gaming bestätigt, Casino Floor, direkt neben Montecristo",en:"Bar top gaming confirmed, casino floor, right next to Montecristo"},visited:false,rating:0},
+  {id:57,name:"Extra Lounge",casino:"Planet Hollywood",area:"strip",type:"bar",note:{de:"Live Music Mi–Sa 21–1 Uhr, 80s/90s Musik",en:"Live music Wed–Sat 9pm–1am, 80s/90s music"},visited:false,rating:0},
+  {id:58,name:"Ringer Bar",casino:"Planet Hollywood",area:"strip",type:"vp",note:{de:"Bar top Gaming bestätigt, direkt am Caesars Sportsbook, Wings/Pizza/Sliders",en:"Bar top gaming confirmed, right at Caesars Sportsbook, wings/pizza/sliders"},visited:false,rating:0},
+  {id:59,name:"Glass Bar",casino:"Planet Hollywood",area:"strip",type:"vp",note:{de:"Bar top Gaming, 24h, eröffnet Winter 2024, Kristallprismen (Rockwell Group)",en:"Bar top gaming, 24h, opened winter 2024, crystal prisms + ombre lighting (Rockwell Group)"},visited:false,rating:0},
+  {id:60,name:"50 Cent's Candy Shop Bar & Lounge",casino:"Planet Hollywood",area:"strip",type:"vp",note:{de:"Bar top Gaming, 80-Zoll Screens, vor Bakkt Theater. Mo–Do 14–22, Fr–Sa 10–22. (ehem. Blue Moon Bar)",en:"Bar top gaming, 80-inch screens, in front of Bakkt Theater. Mon–Thu 2–10pm, Fri–Sat 10am–10pm. (formerly Blue Moon Bar)"},visited:false,rating:0},
+  {id:61,name:"Bound Bar",casino:"Cromwell",area:"strip",type:"vp",note:{de:"Elevated Lobby Bar, VP am Tresen. Achtung: Cromwell wird zu Vanderpump Hotel.",en:"Elevated lobby bar, VP at the bar. Note: Cromwell converting to Vanderpump Hotel."},visited:false,rating:0},
+  {id:62,name:"Interlude",casino:"Cromwell",area:"strip",type:"vp",note:{de:"Lounge mitten im Gaming Floor. Achtung: Cromwell wird zu Vanderpump Hotel.",en:"Lounge in the middle of the gaming floor. Note: Cromwell converting to Vanderpump Hotel."},visited:false,rating:0},
+  {id:63,name:"Whiskey Down",casino:"MGM Grand",area:"strip",type:"live",note:{de:"3 Blackjack Tische + 7 VP-Maschinen, Speakeasy-Stil, 50+ Whiskies, 11–3 Uhr",en:"3 Blackjack tables + 7 VP machines, speakeasy style, 50+ whiskies, 11am–3am"},visited:false,rating:0},
+  {id:64,name:"Lobby Bar",casino:"MGM Grand",area:"strip",type:"vp",note:{de:"Bar top Gaming bestätigt, Sport-TVs, zentrale Lage",en:"Bar top gaming confirmed, sports TVs, central location"},visited:false,rating:0},
+  {id:65,name:"Casino Bar",casino:"MGM Grand",area:"strip",type:"vp",note:{de:"Die lange Bar mitten im Casino, mehrere VP-Maschinen, 14–2 Uhr",en:"The long bar in the middle of the casino, multiple VP machines, 2pm–2am"},visited:false,rating:0},
+  {id:66,name:"Centrifuge",casino:"MGM Grand",area:"strip",type:"bar",note:{de:"Runde Bar neben Hakkasan, Flair Bartender. Mi–Do 19–3, Fr–Sa 19–4, So 19–3.",en:"Round bar next to Hakkasan, flair bartenders. Wed–Thu 7pm–3am, Fri–Sat 7pm–4am, Sun 7pm–3am."},visited:false,rating:0},
+  {id:67,name:"The Tavern",casino:"Fontainebleau",area:"strip",type:"vp",note:{de:"Einzige Gaming Bar im Fontainebleau, im STN Sports Sportsbook, VP ab $0,25 bis $5",en:"Only gaming bar in the Fontainebleau, in STN Sports Sportsbook, VP from $0.25 to $5"},visited:false,rating:0},
+  {id:68,name:"Chickie's & Pete's Crab House & Sports Bar",casino:"Sahara",area:"strip",type:"vp",note:{de:"Super Star Poker VP 50¢/$1, William Hill Sports Betting, 50+ HD Screens",en:"Super Star Poker VP 50c/$1, William Hill Sports Betting, 50+ HD screens"},visited:false,rating:0},
+  {id:69,name:"CASBAR Lounge",casino:"Sahara",area:"strip",type:"vp",note:{de:"24h, VP Slant-tops, Bronze Best Cocktail Bar 2024, Dueling Pianos Fr+Sa, Happy Hour 15–17 + 20–21 + 0–6",en:"24h, VP slant-tops, Bronze Best Cocktail Bar 2024, Dueling Pianos Fri+Sat, Happy Hour 3–5pm + 8–9pm + midnight–6am"},visited:false,rating:0},
   // ── DOWNTOWN ─────────────────────────────────────────────────────────────
-  {id:100,name:"Omaha Bar",casino:"Plaza",area:"downtown",type:"vp",note:"9/6 Bonus Poker Deluxe (99.64%), 9/6 JoB, mehrere Full Pay Titel, 25¢–$5",visited:false,rating:0},
-  {id:101,name:"The Sand Dollar Downtown",casino:"Plaza",area:"downtown",type:"vp",note:"Bar top VP, hohe Paytables wie Omaha Bar",visited:false,rating:0},
-  {id:102,name:"Carousel Bar",casino:"Plaza",area:"downtown",type:"vp",note:"Outdoor, Fremont Street Blick, Video Poker an fast 100 Plätzen. U2 filmten hier 'Atomic City' (2023).",visited:false,rating:0},
-  {id:103,name:"William Hill Sports Book Bar",casino:"Plaza",area:"downtown",type:"vp",note:"VP Bartops, kürzlich renoviert mit verbesserten Paytables",visited:false,rating:0},
-  {id:104,name:"Bar Prohibition!",casino:"Golden Gate",area:"downtown",type:"vp",note:"Einzige interne Bar, VP + Keno am Tresen, Open Bar täglich 18–19 Uhr, Dancing Bartender",visited:false,rating:0},
-  {id:105,name:"OneBar",casino:"Golden Gate",area:"downtown",type:"bar",note:"Outdoor an der Fremont Street, Frozen Cocktails, Bikini-Bartender",visited:false,rating:0},
-  {id:106,name:"Claude's Bar",casino:"Golden Nugget",area:"downtown",type:"vp",note:"24h, VP am Tresen, Sport-Screens. Benannt nach Claude Kimberlin (Poker- und Rodeo-Champion).",visited:false,rating:0},
-  {id:107,name:"Bar 46",casino:"Golden Nugget",area:"downtown",type:"live",note:"Live Gaming + Outdoor Patio mit Fremont Street View",visited:false,rating:0},
-  {id:108,name:"Rush Lounge",casino:"Golden Nugget",area:"downtown",type:"bar",note:"Handgemachte Cocktails, VIP Service, Blackjack direkt dabei",visited:false,rating:0},
-  {id:109,name:"Sportsbook Bar",casino:"Golden Nugget",area:"downtown",type:"vp",note:"Bar top Gaming bestätigt, eigener unabhängiger Sportsbook",visited:false,rating:0},
-  {id:110,name:"Ice Bar",casino:"Golden Nugget",area:"downtown",type:"bar",note:"Blick auf Pool und Shark Tank, breite Vodka/Gin-Auswahl",visited:false,rating:0},
-  {id:111,name:"Longbar",casino:"The D",area:"downtown",type:"vp",note:"100-Fuß Bar, 10–20 Craft Biere vom Fass als Comp-Drinks, VP an allen Plätzen. Erdgeschoss neben Tischspielen.",visited:false,rating:0},
-  {id:112,name:"Vue Bar",casino:"The D",area:"downtown",type:"vp",note:"2. Stock, eines der besten VP-Spiele Downtown im Quarter-Bereich + Progressives. Neben Sigma Derby.",visited:false,rating:0},
-  {id:113,name:"Bar Canada",casino:"The D",area:"downtown",type:"vp",note:"2. Stock neben Circa Sportsbook, Bar top Gaming bestätigt (laut Daniel), Hockey-Thema",visited:false,rating:0},
-  {id:114,name:"Overhang Bar",casino:"The D",area:"downtown",type:"bar",note:"Hängt über dem Casino Floor, Fremont Street Experience Blick",visited:false,rating:0},
-  {id:115,name:"Roulette Bar",casino:"El Cortez",area:"downtown",type:"vp",note:"Neu Feb. 2025 ($20M Expansion), inspiriert von Roulettetisch, Bar top VP",visited:false,rating:0},
-  {id:116,name:"Showbar",casino:"El Cortez",area:"downtown",type:"vp",note:"Neu Feb. 2025, 15 Bar top VP-Maschinen, großes Video-Screen, Live Entertainment, Old Hollywood-Glamour",visited:false,rating:0},
-  {id:117,name:"The Parlour Bar",casino:"El Cortez",area:"downtown",type:"vp",note:"Bar top Gaming, Happy Hour täglich 17–19 Uhr",visited:false,rating:0},
-  {id:118,name:"Ike's Bar",casino:"El Cortez",area:"downtown",type:"vp",note:"24h, 1.300 sqft Lounge, 10x 55-Zoll + 3x 65-Zoll TVs, direkt im Casino Pit",visited:false,rating:0},
-  {id:119,name:"Casino Bar",casino:"Fremont Hotel",area:"downtown",type:"vp",note:"Bar top VP, Blackjack und Slots am Tresen, mitten im Casino Floor",visited:false,rating:0},
-  {id:120,name:"FanDuel Sportsbook Bar",casino:"Fremont Hotel",area:"downtown",type:"vp",note:"Bar top Gaming, große Videowand, VP ab $1",visited:false,rating:0},
-  {id:121,name:"Filament Bar",casino:"Fremont Hotel",area:"downtown",type:"vp",note:"Bar top Gaming bestätigt, Glühbirnen/Neon-Thema",visited:false,rating:0},
-  {id:122,name:"Kings Bar",casino:"Four Queens",area:"downtown",type:"vp",note:"Bestes Bar top VP in ganz Las Vegas: 10/6 Double Double Bonus 50¢/$1 (99.96% RTP). Nahe West Entrance.",visited:false,rating:0},
-  {id:123,name:"Palace Bar",casino:"Four Queens",area:"downtown",type:"vp",note:"Identische hohe VP-Paytables wie Kings Bar. Nahe Wana Taco.",visited:false,rating:0},
-  {id:124,name:"Chicago Brewing Co.",casino:"Four Queens",area:"downtown",type:"vp",note:"Award-winning Micro-Brews, VP am Tresen, Garlic Knots – Downtown-Klassiker",visited:false,rating:0},
-  {id:125,name:"Patio Bar",casino:"Four Queens",area:"downtown",type:"bar",note:"Outdoor, direkt an der Fremont Street mit Blick auf SlotZilla Zipline",visited:false,rating:0},
-  {id:126,name:"Front Bar",casino:"Binion's",area:"downtown",type:"vp",note:"VP am Tresen mit Video Craps, Roulette & Baccarat",visited:false,rating:0},
-  {id:127,name:"West Bar",casino:"Binion's",area:"downtown",type:"vp",note:"Progressive Video Poker am Tresen",visited:false,rating:0},
-  {id:128,name:"Benny's Smokin' BBQ & Brews Bar",casino:"Binion's",area:"downtown",type:"vp",note:"Video Keno & 8/5 VP am Tresen, BBQ-Restaurant",visited:false,rating:0},
-  {id:129,name:"Whiskey Licker Up Saloon",casino:"Binion's",area:"downtown",type:"bar",note:"Open-Air, rotierende Bar, Retraktionsfenster zur Fremont Street, Live Konzerte",visited:false,rating:0},
-  {id:130,name:"Mega Bar",casino:"Circa",area:"downtown",type:"vp",note:"165-Fuß Bar (längste Indoor-Bar Nevada), Flair Bartender, Bar top VP + Slots, 120 Bierzapfhähne",visited:false,rating:0},
-  {id:131,name:"Overhang Bar",casino:"Circa",area:"downtown",type:"vp",note:"Über 3-stöckigem Sportsbook (78 Mio. Pixel Screen), VP-Maschinen am Rand",visited:false,rating:0},
-  {id:132,name:"Vegas Vickie's",casino:"Circa",area:"downtown",type:"bar",note:"Lobby Bar mit ikonischer Neon-Cowgirl-Figur. Kein Bar top Gaming (Foto bestätigt).",visited:false,rating:0},
-  {id:133,name:"Circa Bar",casino:"Circa",area:"downtown",type:"bar",note:"Outdoor FSE, 24 Frozen Cocktail Sorten, Dancing Bartender, längste Outdoor-Bar an der FSE",visited:false,rating:0},
-  {id:134,name:"Legacy Club",casino:"Circa",area:"downtown",type:"bar",note:"Rooftop Cocktail Lounge, 60. Stockwerk, Panoramablick auf Downtown + Strip",visited:false,rating:0},
-  {id:135,name:"Boar's Head Bar",casino:"Main Street Station",area:"downtown",type:"vp",note:"Full Pay JoB an allen Bar top Maschinen. Bestes Bar top VP laut einer Quelle. Triple 7 Micro-Brews on tap.",visited:false,rating:0},
-  {id:136,name:"Triple 7 Restaurant & Microbrewery",casino:"Main Street Station",area:"downtown",type:"vp",note:"Brewpub, 9/6 JoB Bartop, Biere ab $1,50–$2, Hausbrauerei, Victorian-Dekor",visited:false,rating:0},
-  {id:137,name:"Cal Sports Lounge",casino:"California (The Cal)",area:"downtown",type:"vp",note:"Bar top Gaming bestätigt, Sportsbook Lounge, VP/Blackjack/Keno/Slots am Tresen",visited:false,rating:0},
-  {id:138,name:"Holo Holo – The Happy Bar",casino:"California (The Cal)",area:"downtown",type:"vp",note:"Bar top Gaming bestätigt, Hawaiian-Theme",visited:false,rating:0},
-  {id:139,name:"Furnace",casino:"Downtown Grand",area:"downtown",type:"vp",note:"Haupt-Casino Bar mit Video Poker am Tresen, industrieller Chic-Stil",visited:false,rating:0},
-
-  // ── LOCAL CASINOS ─────────────────────────────────────────────────────────
-  // Red Rock
-  {id:200,name:"Sports Book Bar",casino:"Red Rock Resort",area:"local",type:"vp",note:"Bar top VP explizit bestätigt, VIP-Bereich mit Blick auf Sportsbook, 96-Fuß Videowand",visited:false,rating:0},
-  {id:201,name:"Polaris Bar",casino:"Red Rock Resort",area:"local",type:"vp",note:"26 Bar top Gaming Terminals, Signature Cocktails, direkt an Restaurant Row",visited:false,rating:0},
-  {id:202,name:"Lucky Bar",casino:"Red Rock Resort",area:"local",type:"bar",note:"Mitten im Casino Floor, Burl Wood + 1,6 Mio. Kristalle an der Decke",visited:false,rating:0},
-  {id:203,name:"Rocks Lounge",casino:"Red Rock Resort",area:"local",type:"bar",note:"Live Musik täglich, VIP Booths, Ultra-modernes Design",visited:false,rating:0},
-  {id:204,name:"Onyx Bar",casino:"Red Rock Resort",area:"local",type:"bar",note:"Barrel-aged Whiskeys, Signature Cocktails, 10-Personen VIP Raum",visited:false,rating:0},
-  // Green Valley Ranch
-  {id:210,name:"Casino Bar",casino:"Green Valley Ranch",area:"local",type:"vp",note:"Bar top VP, Locals-Klassiker im mediterranen Resort",visited:false,rating:0},
-  // Palace Station
-  {id:220,name:"Casino Bar",casino:"Palace Station",area:"local",type:"vp",note:"Neu renoviert, 28 Bar top Slots + Live Table Games",visited:false,rating:0},
-  {id:221,name:"Game On Sports Bar",casino:"Palace Station",area:"local",type:"vp",note:"High Energy Restaurant & Sports Bar mit Bar top Gaming",visited:false,rating:0},
-  // Boulder Station
-  {id:230,name:"Kixx Bar",casino:"Boulder Station",area:"local",type:"vp",note:"Video Poker Bar auf dem Casino Floor",visited:false,rating:0},
-  {id:231,name:"Sports Bar",casino:"Boulder Station",area:"local",type:"vp",note:"Bar top VP, 20+ TVs, STN Sportsbook direkt daneben",visited:false,rating:0},
-  {id:232,name:"Havana Cigar Bar & Lounge",casino:"Boulder Station",area:"local",type:"vp",note:"Top-shelf Liquors, Fine Cigars, Video Poker am Tresen",visited:false,rating:0},
-  // Sunset Station
-  {id:240,name:"Gaudi Bar",casino:"Sunset Station",area:"local",type:"bar",note:"Inspiriert von Architekt Gaudí, beeindruckendes Kunstwerk. Kein Bar top Gaming bestätigt.",visited:false,rating:0},
-  {id:241,name:"STN Sports Lounge",casino:"Sunset Station",area:"local",type:"vp",note:"Bar top VP, Sportsbook-Lounge mit großen Screens",visited:false,rating:0},
-  // Santa Fe Station
-  {id:250,name:"Casino Bar",casino:"Santa Fe Station",area:"local",type:"vp",note:"28 Bar top Slots + Live Table Games direkt am Casino Floor",visited:false,rating:0},
-  {id:251,name:"4949 Bar",casino:"Santa Fe Station",area:"local",type:"bar",note:"Handgemachte Cocktails, VIP Booths, Bottle Service, Center Bar",visited:false,rating:0},
+  {id:100,name:"Omaha Bar",casino:"Plaza",area:"downtown",type:"vp",note:{de:"9/6 Bonus Poker Deluxe (99.64%), 9/6 JoB, mehrere Full Pay Titel, 25¢–$5",en:"9/6 Bonus Poker Deluxe (99.64%), 9/6 JoB, multiple full pay titles, 25c-$5"},visited:false,rating:0},
+  {id:101,name:"The Sand Dollar Downtown",casino:"Plaza",area:"downtown",type:"vp",note:{de:"Bar top VP, hohe Paytables wie Omaha Bar",en:"Bar top VP, high paytables like Omaha Bar"},visited:false,rating:0},
+  {id:102,name:"Carousel Bar",casino:"Plaza",area:"downtown",type:"vp",note:{de:"Outdoor, Fremont Street Blick, VP an fast 100 Plätzen. U2 filmten hier Atomic City (2023).",en:"Outdoor, Fremont Street view, VP at almost 100 seats. U2 filmed Atomic City here (2023)."},visited:false,rating:0},
+  {id:103,name:"William Hill Sports Book Bar",casino:"Plaza",area:"downtown",type:"vp",note:{de:"VP Bartops, kürzlich renoviert",en:"VP bartops, recently renovated with improved paytables"},visited:false,rating:0},
+  {id:104,name:"Bar Prohibition!",casino:"Golden Gate",area:"downtown",type:"vp",note:{de:"Einzige interne Bar, VP + Keno am Tresen, Open Bar täglich 18–19 Uhr, Dancing Bartender",en:"Only internal bar, VP + Keno at the bar, open bar daily 6–7pm, dancing bartender"},visited:false,rating:0},
+  {id:105,name:"OneBar",casino:"Golden Gate",area:"downtown",type:"bar",note:{de:"Outdoor an der Fremont Street, Frozen Cocktails, Bikini-Bartender",en:"Outdoor at Fremont Street, frozen cocktails, bikini bartenders"},visited:false,rating:0},
+  {id:106,name:"Claude's Bar",casino:"Golden Nugget",area:"downtown",type:"vp",note:{de:"24h, VP am Tresen, Sport-Screens. Benannt nach Claude Kimberlin (Poker- und Rodeo-Champion).",en:"24h, VP at the bar, sports screens. Named after Claude Kimberlin (poker and rodeo champion)."},visited:false,rating:0},
+  {id:107,name:"Bar 46",casino:"Golden Nugget",area:"downtown",type:"live",note:{de:"Live Gaming + Outdoor Patio mit Fremont Street View",en:"Live gaming + outdoor patio with Fremont Street view"},visited:false,rating:0},
+  {id:108,name:"Rush Lounge",casino:"Golden Nugget",area:"downtown",type:"bar",note:{de:"Handgemachte Cocktails, VIP Service, Blackjack direkt dabei",en:"Handcrafted cocktails, VIP service, Blackjack nearby"},visited:false,rating:0},
+  {id:109,name:"Sportsbook Bar",casino:"Golden Nugget",area:"downtown",type:"vp",note:{de:"Bar top Gaming bestätigt, eigener unabhängiger Sportsbook",en:"Bar top gaming confirmed, independent sportsbook"},visited:false,rating:0},
+  {id:110,name:"Ice Bar",casino:"Golden Nugget",area:"downtown",type:"bar",note:{de:"Blick auf Pool und Shark Tank, breite Vodka/Gin-Auswahl",en:"View of pool and Shark Tank, wide vodka/gin selection"},visited:false,rating:0},
+  {id:111,name:"Longbar",casino:"The D",area:"downtown",type:"vp",note:{de:"100-Fuß Bar, 10–20 Craft Biere vom Fass als Comp-Drinks, VP an allen Plätzen. Erdgeschoss neben Tischspielen.",en:"100-foot bar, 10–20 craft beers on tap as comp drinks, VP at all seats. Ground floor next to table games."},visited:false,rating:0},
+  {id:112,name:"Vue Bar",casino:"The D",area:"downtown",type:"vp",note:{de:"2. Stock, eines der besten VP-Spiele Downtown im Quarter-Bereich + Progressives. Neben Sigma Derby.",en:"2nd floor, one of the best VP games Downtown in the quarter range + progressives. Next to Sigma Derby."},visited:false,rating:0},
+  {id:113,name:"Bar Canada",casino:"The D",area:"downtown",type:"vp",note:{de:"2. Stock neben Circa Sportsbook, Bar top Gaming bestätigt, Hockey-Thema",en:"2nd floor next to Circa Sportsbook, bar top gaming confirmed, hockey theme"},visited:false,rating:0},
+  {id:114,name:"Overhang Bar",casino:"The D",area:"downtown",type:"bar",note:{de:"Hängt über dem Casino Floor, Fremont Street Experience Blick",en:"Hangs over the casino floor, Fremont Street Experience view"},visited:false,rating:0},
+  {id:115,name:"Roulette Bar",casino:"El Cortez",area:"downtown",type:"vp",note:{de:"Neu Feb. 2025 ($20M Expansion), inspiriert von Roulettetisch, Bar top VP",en:"New Feb. 2025 ($20M expansion), inspired by roulette table, bar top VP"},visited:false,rating:0},
+  {id:116,name:"Showbar",casino:"El Cortez",area:"downtown",type:"vp",note:{de:"Neu Feb. 2025, 15 Bar top VP-Maschinen, großes Video-Screen, Live Entertainment, Old Hollywood-Glamour",en:"New Feb. 2025, 15 bar top VP machines, large video screen, live entertainment, old Hollywood glamour"},visited:false,rating:0},
+  {id:117,name:"The Parlour Bar",casino:"El Cortez",area:"downtown",type:"vp",note:{de:"Bar top Gaming, Happy Hour täglich 17–19 Uhr",en:"Bar top gaming, happy hour daily 5–7pm"},visited:false,rating:0},
+  {id:118,name:"Ike's Bar",casino:"El Cortez",area:"downtown",type:"vp",note:{de:"24h, 1.300 sqft Lounge, 10x 55-Zoll + 3x 65-Zoll TVs, direkt im Casino Pit",en:"24h, 1,300 sqft lounge, 10x 55-inch + 3x 65-inch TVs, right in the casino pit"},visited:false,rating:0},
+  {id:119,name:"Casino Bar",casino:"Fremont Hotel",area:"downtown",type:"vp",note:{de:"Bar top VP, Blackjack und Slots am Tresen, mitten im Casino Floor",en:"Bar top VP, Blackjack and Slots at the bar, right on the casino floor"},visited:false,rating:0},
+  {id:120,name:"FanDuel Sportsbook Bar",casino:"Fremont Hotel",area:"downtown",type:"vp",note:{de:"Bar top Gaming, große Videowand, VP ab $1",en:"Bar top gaming, large video wall, VP from $1"},visited:false,rating:0},
+  {id:121,name:"Filament Bar",casino:"Fremont Hotel",area:"downtown",type:"vp",note:{de:"Bar top Gaming bestätigt, Glühbirnen/Neon-Thema",en:"Bar top gaming confirmed, light bulb/neon theme"},visited:false,rating:0},
+  {id:122,name:"Kings Bar",casino:"Four Queens",area:"downtown",type:"vp",note:{de:"Bestes Bar top VP in ganz Las Vegas: 10/6 Double Double Bonus 50¢/$1 (99.96% RTP). Nahe West Entrance.",en:"Best bar top VP in all of Las Vegas: 10/6 Double Double Bonus 50c/$1 (99.96% RTP). Near west entrance."},visited:false,rating:0},
+  {id:123,name:"Palace Bar",casino:"Four Queens",area:"downtown",type:"vp",note:{de:"Identische hohe VP-Paytables wie Kings Bar. Nahe Wana Taco.",en:"Identical high VP paytables as Kings Bar. Near Wana Taco."},visited:false,rating:0},
+  {id:124,name:"Chicago Brewing Co.",casino:"Four Queens",area:"downtown",type:"vp",note:{de:"Award-winning Micro-Brews, VP am Tresen, Garlic Knots – Downtown-Klassiker",en:"Award-winning micro-brews, VP at the bar, garlic knots - Downtown classic"},visited:false,rating:0},
+  {id:125,name:"Patio Bar",casino:"Four Queens",area:"downtown",type:"bar",note:{de:"Outdoor, direkt an der Fremont Street mit Blick auf SlotZilla Zipline",en:"Outdoor, right on Fremont Street with view of SlotZilla Zipline"},visited:false,rating:0},
+  {id:126,name:"Front Bar",casino:"Binion's",area:"downtown",type:"vp",note:{de:"VP am Tresen mit Video Craps, Roulette & Baccarat",en:"VP at the bar with Video Craps, Roulette & Baccarat"},visited:false,rating:0},
+  {id:127,name:"West Bar",casino:"Binion's",area:"downtown",type:"vp",note:{de:"Progressive Video Poker am Tresen",en:"Progressive Video Poker at the bar"},visited:false,rating:0},
+  {id:128,name:"Benny's Smokin' BBQ & Brews Bar",casino:"Binion's",area:"downtown",type:"vp",note:{de:"Video Keno & 8/5 VP am Tresen, BBQ-Restaurant",en:"Video Keno & 8/5 VP at the bar, BBQ restaurant"},visited:false,rating:0},
+  {id:129,name:"Whiskey Licker Up Saloon",casino:"Binion's",area:"downtown",type:"bar",note:{de:"Open-Air, rotierende Bar, Retraktionsfenster zur Fremont Street, Live Konzerte",en:"Open-air, rotating bar, retractable windows to Fremont Street, live concerts"},visited:false,rating:0},
+  {id:130,name:"Mega Bar",casino:"Circa",area:"downtown",type:"vp",note:{de:"165-Fuß Bar (längste Indoor-Bar Nevada), Flair Bartender, Bar top VP + Slots, 120 Bierzapfhähne",en:"165-foot bar (longest indoor bar in Nevada), flair bartenders, bar top VP + slots, 120 beer taps"},visited:false,rating:0},
+  {id:131,name:"Overhang Bar",casino:"Circa",area:"downtown",type:"vp",note:{de:"Über 3-stöckigem Sportsbook (78 Mio. Pixel Screen), VP-Maschinen am Rand",en:"Above 3-story sportsbook (78 million pixel screen), VP machines along the edge"},visited:false,rating:0},
+  {id:132,name:"Vegas Vickie's",casino:"Circa",area:"downtown",type:"bar",note:{de:"Lobby Bar mit ikonischer Neon-Cowgirl-Figur. Kein Bar top Gaming (Foto bestätigt).",en:"Lobby bar with iconic neon cowgirl figure. No bar top gaming (confirmed by photo)."},visited:false,rating:0},
+  {id:133,name:"Circa Bar",casino:"Circa",area:"downtown",type:"bar",note:{de:"Outdoor FSE, 24 Frozen Cocktail Sorten, Dancing Bartender, längste Outdoor-Bar an der FSE",en:"Outdoor FSE, 24 frozen cocktail varieties, dancing bartender, longest outdoor bar at FSE"},visited:false,rating:0},
+  {id:134,name:"Legacy Club",casino:"Circa",area:"downtown",type:"bar",note:{de:"Rooftop Cocktail Lounge, 60. Stockwerk, Panoramablick auf Downtown + Strip",en:"Rooftop cocktail lounge, 60th floor, panoramic view of Downtown + Strip"},visited:false,rating:0},
+  {id:135,name:"Boar's Head Bar",casino:"Main Street Station",area:"downtown",type:"vp",note:{de:"Full Pay JoB an allen Bar top Maschinen. Bestes Bar top VP laut einer Quelle. Triple 7 Micro-Brews on tap.",en:"Full Pay JoB at all bar top machines. Best bar top VP according to one source. Triple 7 micro-brews on tap."},visited:false,rating:0},
+  {id:136,name:"Triple 7 Restaurant & Microbrewery",casino:"Main Street Station",area:"downtown",type:"vp",note:{de:"Brewpub, 9/6 JoB Bartop, Biere ab $1,50–$2, Hausbrauerei, Victorian-Dekor",en:"Brewpub, 9/6 JoB bartop, beers from $1.50-$2, house brewery, Victorian decor"},visited:false,rating:0},
+  {id:137,name:"Cal Sports Lounge",casino:"California (The Cal)",area:"downtown",type:"vp",note:{de:"Bar top Gaming bestätigt, Sportsbook Lounge, VP/Blackjack/Keno/Slots am Tresen",en:"Bar top gaming confirmed, sportsbook lounge, VP/Blackjack/Keno/Slots at the bar"},visited:false,rating:0},
+  {id:138,name:"Holo Holo – The Happy Bar",casino:"California (The Cal)",area:"downtown",type:"vp",note:{de:"Bar top Gaming bestätigt, Hawaiian-Theme",en:"Bar top gaming confirmed, Hawaiian theme"},visited:false,rating:0},
+  {id:139,name:"Furnace",casino:"Downtown Grand",area:"downtown",type:"vp",note:{de:"Haupt-Casino Bar mit Video Poker am Tresen, industrieller Chic-Stil",en:"Main casino bar with Video Poker at the bar, industrial chic style"},visited:false,rating:0},
+  // ── LOCAL ─────────────────────────────────────────────────────────────────
+  {id:200,name:"Sports Book Bar",casino:"Red Rock Resort",area:"local",type:"vp",note:{de:"Bar top VP explizit bestätigt, VIP-Bereich mit Blick auf Sportsbook, 96-Fuß Videowand",en:"Bar top VP explicitly confirmed, VIP area overlooking the sportsbook, 96-foot video wall"},visited:false,rating:0},
+  {id:201,name:"Polaris Bar",casino:"Red Rock Resort",area:"local",type:"vp",note:{de:"26 Bar top Gaming Terminals, Signature Cocktails, direkt an Restaurant Row",en:"26 bar top gaming terminals, signature cocktails, right on Restaurant Row"},visited:false,rating:0},
+  {id:202,name:"Lucky Bar",casino:"Red Rock Resort",area:"local",type:"bar",note:{de:"Mitten im Casino Floor, Burl Wood + 1,6 Mio. Kristalle an der Decke",en:"Middle of the casino floor, burl wood + 1.6 million crystals on the ceiling"},visited:false,rating:0},
+  {id:203,name:"Rocks Lounge",casino:"Red Rock Resort",area:"local",type:"bar",note:{de:"Live Musik täglich, VIP Booths, Ultra-modernes Design",en:"Live music daily, VIP booths, ultra-modern design"},visited:false,rating:0},
+  {id:204,name:"Onyx Bar",casino:"Red Rock Resort",area:"local",type:"bar",note:{de:"Barrel-aged Whiskeys, Signature Cocktails, 10-Personen VIP Raum",en:"Barrel-aged whiskeys, signature cocktails, 10-person VIP room"},visited:false,rating:0},
+  {id:210,name:"Casino Bar",casino:"Green Valley Ranch",area:"local",type:"vp",note:{de:"Bar top VP, Locals-Klassiker im mediterranen Resort",en:"Bar top VP, locals classic in the Mediterranean resort"},visited:false,rating:0},
+  {id:220,name:"Casino Bar",casino:"Palace Station",area:"local",type:"vp",note:{de:"Neu renoviert, 28 Bar top Slots + Live Table Games",en:"Newly renovated, 28 bar top slots + live table games"},visited:false,rating:0},
+  {id:221,name:"Game On Sports Bar",casino:"Palace Station",area:"local",type:"vp",note:{de:"High Energy Restaurant & Sports Bar mit Bar top Gaming",en:"High energy restaurant & sports bar with bar top gaming"},visited:false,rating:0},
+  {id:230,name:"Kixx Bar",casino:"Boulder Station",area:"local",type:"vp",note:{de:"Video Poker Bar auf dem Casino Floor",en:"Video Poker bar on the casino floor"},visited:false,rating:0},
+  {id:231,name:"Sports Bar",casino:"Boulder Station",area:"local",type:"vp",note:{de:"Bar top VP, 20+ TVs, STN Sportsbook direkt daneben",en:"Bar top VP, 20+ TVs, STN Sportsbook right next door"},visited:false,rating:0},
+  {id:232,name:"Havana Cigar Bar & Lounge",casino:"Boulder Station",area:"local",type:"vp",note:{de:"Top-shelf Liquors, Fine Cigars, Video Poker am Tresen",en:"Top-shelf liquors, fine cigars, Video Poker at the bar"},visited:false,rating:0},
+  {id:240,name:"Gaudi Bar",casino:"Sunset Station",area:"local",type:"bar",note:{de:"Inspiriert von Architekt Gaudí, beeindruckendes Kunstwerk. Kein Bar top Gaming bestätigt.",en:"Inspired by architect Gaudi, impressive artwork. No bar top gaming confirmed."},visited:false,rating:0},
+  {id:241,name:"STN Sports Lounge",casino:"Sunset Station",area:"local",type:"vp",note:{de:"Bar top VP, Sportsbook-Lounge mit großen Screens",en:"Bar top VP, sportsbook lounge with large screens"},visited:false,rating:0},
+  {id:250,name:"Casino Bar",casino:"Santa Fe Station",area:"local",type:"vp",note:{de:"28 Bar top Slots + Live Table Games direkt am Casino Floor",en:"28 bar top slots + live table games right on the casino floor"},visited:false,rating:0},
+  {id:251,name:"4949 Bar",casino:"Santa Fe Station",area:"local",type:"bar",note:{de:"Handgemachte Cocktails, VIP Booths, Bottle Service, Center Bar",en:"Handcrafted cocktails, VIP booths, bottle service, center bar"},visited:false,rating:0},
 ];
 
-const TYPE_LABELS = {vp:"Video Poker / Bar", live:"Live Tables + Bar", bar:"Bar im Casino"};
+const TYPE_LABELS = {
+  de: {vp:"Video Poker / Bar", live:"Live Tables + Bar", bar:"Bar im Casino"},
+  en: {vp:"Video Poker / Bar", live:"Live Tables + Bar", bar:"Bar in Casino"}
+};
+const UI = {
+  de: {
+    all:"Alle", open:"Offen", visited:"Besucht", add:"+ Hinzufügen",
+    search:"Bar oder Casino suchen...",
+    allCasinos:"Alle Casinos",
+    addTitle:"Bar hinzufügen", editTitle:"Bearbeiten",
+    nameLbl:"Name der Bar", casinoLbl:"Casino", areaLbl:"Bereich", typeLbl:"Typ",
+    strip:"Strip", downtown:"Downtown", local:"Local",
+    cancel:"Abbrechen", save:"Speichern", del:"Löschen",
+    noteEmpty:"+ Notiz", notePlaceholder:"Notizen...",
+    visitedBtn:"✓ Besucht", openBtn:"Offen",
+    ofVisited:"von", progressOf:"besucht",
+  },
+  en: {
+    all:"All", open:"Open", visited:"Visited", add:"+ Add",
+    search:"Search bar or casino...",
+    allCasinos:"All Casinos",
+    addTitle:"Add Bar", editTitle:"Edit",
+    nameLbl:"Bar Name", casinoLbl:"Casino", areaLbl:"Area", typeLbl:"Type",
+    strip:"Strip", downtown:"Downtown", local:"Local",
+    cancel:"Cancel", save:"Save", del:"Delete",
+    noteEmpty:"+ Note", notePlaceholder:"Notes...",
+    visitedBtn:"✓ Visited", openBtn:"Open",
+    ofVisited:"of", progressOf:"visited",
+  }
+};
+
+// Detect language
+let lang = 'de';
+const browserLang = (navigator.language || navigator.userLanguage || 'de').toLowerCase();
+if (!browserLang.startsWith('de')) lang = 'en';
+
+function t(key) { return UI[lang][key] || key; }
+function tNote(note) {
+  if (!note) return '';
+  if (typeof note === 'string') return note;
+  return note[lang] || note.de || '';
+}
+function tType(type) { return TYPE_LABELS[lang][type] || type; }
 const TYPE_CSS = {vp:"type-vp", live:"type-live", bar:"type-bar"};
 
 let bars = [];
@@ -324,15 +361,48 @@ let currentFilter = 'all';
 let editingNote = null;
 
 function save() {
-  try { localStorage.setItem('vegas_tracker_v3', JSON.stringify(bars)); } catch(e){}
+  try { localStorage.setItem('vegas_tracker_v4', JSON.stringify(bars)); } catch(e){}
 }
 function load() {
   try {
-    const r = localStorage.getItem('vegas_tracker_v3');
+    const r = localStorage.getItem('vegas_tracker_v4');
     bars = r ? JSON.parse(r) : JSON.parse(JSON.stringify(BARS));
   } catch(e) { bars = JSON.parse(JSON.stringify(BARS)); }
   buildCasinoTabs();
+  updateUI();
   render();
+}
+
+function toggleLang() {
+  lang = lang === 'de' ? 'en' : 'de';
+  document.getElementById('lang-btn').textContent = lang === 'de' ? 'EN' : 'DE';
+  updateUI();
+  buildCasinoTabs();
+  render();
+}
+
+function updateUI() {
+  // Search placeholder
+  const si = document.getElementById('search-input');
+  if (si) si.placeholder = t('search');
+  // Filter buttons
+  const fAll = document.getElementById('fb-all');
+  if (fAll) fAll.textContent = t('all');
+  const fOpen = document.getElementById('fb-open');
+  if (fOpen) fOpen.textContent = t('open');
+  const fVis = document.getElementById('fb-visited');
+  if (fVis) fVis.textContent = t('visited');
+  // Add button
+  const ab = document.getElementById('add-btn');
+  if (ab) ab.textContent = t('add');
+  // Lang toggle shows opposite
+  const lb = document.getElementById('lang-btn');
+  if (lb) lb.textContent = lang === 'de' ? 'EN' : 'DE';
+  // Area tabs
+  const atAll = document.getElementById('at-all');
+  if (atAll) atAll.textContent = t('all');
+  const atLocal = document.getElementById('at-local');
+  if (atLocal) atLocal.textContent = t('local');
 }
 
 function getCasinos() {
@@ -344,8 +414,16 @@ function getCasinos() {
 function buildCasinoTabs() {
   const casinos = getCasinos();
   const tc = document.getElementById('casino-tabs');
-  tc.innerHTML = `<button class="casino-tab active" onclick="setCasino('all',this)">Alle Casinos</button>` +
-    casinos.map(c => `<button class="casino-tab" onclick="setCasino(${JSON.stringify(c)},this)">${c}</button>`).join('');
+  tc.innerHTML = `<button class="casino-tab active" data-casino="all" onclick="setCasinoBtn(this)">Alle Casinos</button>` +
+    casinos.map(c => `<button class="casino-tab" data-casino="${c.replace(/"/g,'&quot;')}" onclick="setCasinoBtn(this)">${c}</button>`).join('');
+}
+
+function setCasinoBtn(el) {
+  const c = el.getAttribute('data-casino');
+  currentCasino = c;
+  document.querySelectorAll('.casino-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  render();
 }
 
 function setArea(a, el) {
@@ -419,13 +497,13 @@ function render() {
         ).join('');
         let noteSection = '';
         if (editingNote === b.id) {
-          noteSection = `<textarea class="note-input" id="note-${b.id}" placeholder="Notizen..." onblur="saveNote(${b.id})">${b.note}</textarea>`;
+          noteSection = `<textarea class="note-input" id="note-${b.id}" placeholder="${t('notePlaceholder')}" onblur="saveNote(${b.id})">${tNote(b.note)}</textarea>`;
         } else if (b.note) {
-          noteSection = `<div class="note-preview" onclick="startEdit(${b.id})">${b.note.length>100?b.note.slice(0,100)+'…':b.note}</div>`;
+          const n=tNote(b.note); noteSection = `<div class="note-preview" onclick="startEdit(${b.id})">${n.length>100?n.slice(0,100)+'…':n}</div>`;
         } else {
-          noteSection = `<div class="note-empty" onclick="startEdit(${b.id})">+ Notiz</div>`;
+          noteSection = `<div class="note-empty" onclick="startEdit(${b.id})">${t('noteEmpty')}</div>`;
         }
-        const typeLabel = TYPE_LABELS[b.type]||b.type;
+        const typeLabel = tType(b.type);
         const typeCss = TYPE_CSS[b.type]||'';
         return `<div class="bar-card ${b.visited?'visited':''}" id="card-${b.id}">
           <div class="bar-top">
@@ -435,7 +513,7 @@ function render() {
             </div>
             <div class="bar-actions">
               <div class="stars">${stars}</div>
-              <button class="visit-btn ${b.visited?'done':''}" onclick="toggleVisit(${b.id})">${b.visited?'✓ Besucht':'Offen'}</button>
+              <button class="visit-btn ${b.visited?'done':''}" onclick="toggleVisit(${b.id})">${b.visited?t('visitedBtn'):t('openBtn')}</button>
               <button class="icon-btn" onclick="openEdit(${b.id})">···</button>
             </div>
           </div>
@@ -455,18 +533,18 @@ function openAdd() {
   document.getElementById('modal-root').innerHTML = `
     <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
       <div class="modal">
-        <h2>Bar hinzufügen</h2>
-        <div class="form-group"><label>Name der Bar</label><input type="text" id="m-name" placeholder="z.B. Center Bar"></div>
-        <div class="form-group"><label>Casino</label><input type="text" id="m-casino" placeholder="z.B. Bellagio"></div>
-        <div class="form-group"><label>Bereich</label>
-          <select id="m-area"><option value="strip">Strip</option><option value="downtown">Downtown</option><option value="local">Local Casino</option></select>
+        <h2>${t('addTitle')}</h2>
+        <div class="form-group"><label>${t('nameLbl')}</label><input type="text" id="m-name" placeholder="e.g. Center Bar"></div>
+        <div class="form-group"><label>${t('casinoLbl')}</label><input type="text" id="m-casino" placeholder="e.g. Bellagio"></div>
+        <div class="form-group"><label>${t('areaLbl')}</label>
+          <select id="m-area"><option value="strip">${t('strip')}</option><option value="downtown">${t('downtown')}</option><option value="local">${t('local')}</option></select>
         </div>
-        <div class="form-group"><label>Typ</label>
-          <select id="m-type"><option value="vp">Video Poker / Bar</option><option value="live">Live Tables + Bar</option><option value="bar">Bar im Casino</option></select>
+        <div class="form-group"><label>${t('typeLbl')}</label>
+          <select id="m-type"><option value="vp">Video Poker / Bar</option><option value="live">Live Tables + Bar</option><option value="bar">${tType('bar')}</option></select>
         </div>
         <div class="modal-btns">
-          <button class="btn-cancel" onclick="closeModal()">Abbrechen</button>
-          <button class="btn-save" onclick="addBar()">Hinzufügen</button>
+          <button class="btn-cancel" onclick="closeModal()">${t('cancel')}</button>
+          <button class="btn-save" onclick="addBar()">${t('add')}</button>
         </div>
       </div>
     </div>`;
